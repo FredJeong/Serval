@@ -65,13 +65,6 @@ def logout():
     pop_login_session()
     return redirect(url_for('index'))
 
-@app.route('/login')
-def login():
-    return render_template(
-        'login.html',
-        content='Login Page',
-        session=session)
-
 @app.route('/')
 def index():
     user_id = None
