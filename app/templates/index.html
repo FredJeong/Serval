@@ -4,18 +4,19 @@
 {% if not session.logged_in %}
     <a href="/facebook_login">Login or Signup</a>
 {% else %}
-    <div id="login_info">
-        Hello, {{session.user_name}}!<br>
-        <span style="font-size:70%;color:#aaa;">{{session.user_id}}</span>
-        <a href="/logout">Logout</a>
+    <div class="page-header" id="login_info">
+        <h1>Hello, {{session.user_name}}!</h1>
+        <p><span style="font-size:70%;color:#aaa;">{{session.user_id}}</span><p>
+        <a class="btn btn-primary btn-xs" href="/logout">Logout</a>
     </div>
 
+    <h3>내 펀딩</h3>
     <ul id="petitions">
     {% for petition in petitions %}
-        <li><a href="/petition/{{petition.id}}">{{petition.title}}</a></li>
+        <li><a href="/petition/{{petition.id}}">{{petition.title}}</a> <small style="color:#888;">{{petition.timestamp.strftime("%m/%d %H:%M")}}</small></li>
     {% endfor %}
     </ul>
-    <a href="/petition/create">Create New..</a>
+    <a class="btn btn-success" href="/petition/create">새 펀딩 만들기..</a>
 {% endif %}
 
 {% endblock %}
