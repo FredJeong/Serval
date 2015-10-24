@@ -19,3 +19,5 @@ lm = LoginManager()
 lm.init_app(app)
 
 from app import views, models, forms, config
+
+app.secret_key = config.secret_key
