@@ -31,21 +31,20 @@ function remove_item(obj) {
 }
 
 function submit_form() {
-    var formdata = new FormData($("#petition_form")[0]);
-    var names = formdata.getAll("item_name");
-    var prices = formdata.getAll("item_price");
-
+    var title = $("#title").val();
+    var content = $("#content").val();
     var items = [];
+    $("#items li").each(function(i, e) {
+        items.push(
+            $(e).find("input[type=number]").val() + "|" + $(e).find("input[type=text]").val());
+    });
 
-    for (var i = 0; i < names.length; i++) {
-        items.push(prices[i] + "|" + names[i]);
-    }
     $.ajax({
         type: "POST",
         url: "/api/petition",
         data: {
-            title: formdata.get("title"),
-            content: formdata.get("content"),
+            title: title,
+            content: content,
             items: items
         },
         success: function(data) {
