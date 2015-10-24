@@ -4,6 +4,7 @@ import datetime
 
 class User(db.Document):
     facebook_id = LongField(unique=True)
+    name = StringField()
 
     def is_authenticated(self):
         return True

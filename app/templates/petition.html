@@ -5,7 +5,15 @@
 <div>{{petition.content}}</div>
 <ul>
 {% for item in petition.items %}
-<li>{{item.description}} ({{item.current_fund}}/{{item.target_fund}}) <input type="number"></input> <button type="button" onclick='fund("{{item.id}}",this)'>fund</button></li>
+<li>{{item.description}} ({{item.current_fund}}/{{item.target_fund}})
+    <input type="number"></input>
+    <button type="button" onclick='fund("{{item.id}}",this)'>fund</button>
+    <ul>
+    {% for donation in item.donations %}
+        <li>{{donation.balance}} by {{donation.user.name}} ({{donation.timestamp}})</li>
+    {% endfor %}
+    </ul>
+</li>
 {% endfor %}
 {% endblock %}
 

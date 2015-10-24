@@ -63,7 +63,9 @@ def facebook_authorized(resp):
     if user is None:
         user = models.User(facebook_id=session['user_id'])
         user.save()
-
+    if user.name != session['user_name']:
+        user.name = session['user_name']
+        user.save()
     login_user(user)
 
     return redirect(next_url)
