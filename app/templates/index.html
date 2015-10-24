@@ -1,7 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
 {% if not session.logged_in %}
-    <li><a href="/facebook_login">Login or Signup</a></li>
-    {% else %}
-    <li>Hello, {{user_name}}!<br>
-        <span style="font-size:70%;color:#aaa;">{{user_id}}</span>
-        <a href="/logout">Logout</a></li>
+    <a href="/facebook_login">Login or Signup</a>
+{% else %}
+    <div id="login_info">
+        Hello, {{session.user_name}}!<br>
+        <span style="font-size:70%;color:#aaa;">{{session.user_id}}</span>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <ul id="petitions">
+    {% for petition in petitions %}
+        <li><a href="/petition/{{petition.id}}">{{petition.title}}</a></li>
+    {% endfor %}
+    </ul>
+    <a href="/petition/create">Create New..</a>
 {% endif %}
+
+{% endblock %}

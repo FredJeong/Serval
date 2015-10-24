@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{petition.title}}</h1>
+<div>{{petition.content}}</div>
+<ul>
+{% for item in petition.items %}
+<li>{{item.description}} ({{item.current_fund}}/{{item.target_fund}}) <input type="number"></input> <button type="button" onclick='fund("{{item.id}}",this)'>fund</button></li>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+function fund(uid, obj) {
+    var balance = $(obj).parent().find("input").val();
+
+    $.ajax({
+        type: 'PUT',
+        url: '/api/item/' + uid + '/fund',
+        data: {
+            balance: balance
+        },
+        success: function(data) {
+
+            location.reload();
+        },
+        error: function() {
+            alert("Error occured while funding");
+        }
+    });
+}
+</script>
+{% endblock %}

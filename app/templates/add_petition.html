@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+<form id="petition_form">
+    {{ form.csrf_token }}
+    <ul style="list-style:none;">
+        <li>{{form.title.label}} {{form.title}}</li>
+        <li>{{form.content.label}}<br>{{form.content}}</li>
+    </ul>
+    <button type="button" onclick="add_item_input()">추가</button>
+    <ul style="list-style:none" id="items">
+    </ul>
+    <button type="button" onclick="submit_form()">등록</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+function add_item_input() {
+    var html = 
+        "<li>상품명 <input type='text' name='item_name'></input> 가격 <input type='number' name='item_price'></input><button type='button' onclick='remove_item(this);'>-</button    ></li>";
+    $("#items").append(html);
+}
+
+function remove_item(obj) {
+    console.log(obj);
+    $(obj).parent().remove();
+}
+
+function submit_form() {
+    var formdata = new FormData($("#petition_form")[0]);
+    var names = formdata.getAll("item_name");
+    var prices = formdata.getAll("item_price");
+
+    var items = [];
+
+    for (var i = 0; i < names.length; i++) {
+        items.push(prices[i] + "|" + names[i]);
+    }
+    $.ajax({
+        type: "POST",
+        url: "/api/petition",
+        data: {
+            title: formdata.get("title"),
+            content: formdata.get("content"),
+            items: items
+        },
+        success: function(data) {
+            console.log(data);
+            location.href = "/petition/" + data.id;
+        },
+        error: function() {
+            alert("Error occured while creating petition.");
+        }
+    });
+}
+
+add_item_input();
+</script>
+{% endblock %}
