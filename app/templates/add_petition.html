@@ -5,7 +5,7 @@
 
 {% block content %}
 <style>
-#items li{height: 40px;}
+#items li{min-height: 40px;}
 #items {padding-top: 10px;}
 #items form *{margin-right: 5px;}
 </style>
@@ -21,7 +21,7 @@
         {{form.content(class="form-control", rows=5)}}
     </div>
 
-    <button class="btn btn-success" type="button" onclick="add_item_input()">+ 추가</button>
+    <button class="btn btn-success" type="button" onclick="add_item_input()"><i class='fa fa-plus'></i> 추가</button>
     <ul class="list-unstyled" id="items">
     </ul>
     <button class="btn btn-primary" type="button" onclick="submit_form()">등록</button>
@@ -38,7 +38,7 @@ function add_item_input() {
         "<div class='form-group'><label>가격</label>" +
         "<input class='form-control' type='number' name='item_price'></input></div>" +
         "<button class='btn btn-danger' type='button' onclick='remove_item(this);'>" + 
-        "X" +
+        "<i class='fa fa-times'></i>" +
         "</button></li>";
     $("#items").append(html);
 }

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-
-
 {% block content %}
 <h1>{{petition.title}}</h1>
 <div>{{petition.content}}</div>
 <style>
 #item-list ul{margin-bottom: 10px;}
 #item-list .progress {max-width:500px;}
+.donation-pending {color: #888;}
+.donation-confirmed {color: #5CB85C;}
 </style>
 <h3>구매 목록</h3>
 <ul id="item-list">
@@ -16,18 +16,34 @@
     <form class="form-inline">
         <div class="form-group">
             <label>{{item.description}} ({{item.current_fund}}/{{item.target_fund}})</label>
-            <input class="form-control" type="number"></input>
+            <input style="width:110px" class="form-control" type="number"></input>
         </div>
-        <button class="btn btn-default" type="button" onclick='fund("{{item.id}}",this)'>fund</button>
+        <button class="btn btn-default" type="button" onclick='fund("{{item.id}}",this)'>펀딩</button>
     </form>
     <div class="progress">
-        <div class="progress-bar" style="width: {{item.current_fund*100/item.target_fund}}%;">
+        <div class="progress-bar progress-bar-success" style="width: {{item.current_fund*100/item.target_fund}}%;">
             {{(item.current_fund*100/item.target_fund) | round }}%
         </div>
+        {% if item.pending_fund != 0 %}
+        <div class="progress-bar progress-bar-warning progress-bar-striped active" style="width: {{item.pending_fund*100/item.target_fund}}%;">
+            {{(item.pending_fund*100/item.target_fund) | round }}%
+        </div>
+        {% endif %}
     </div>
     <ul>
     {% for donation in item.donations %}
-        <li>{{donation.balance}} by {{donation.user.name}} ({{donation.timestamp.strftime("%m/%d %H:%M")}})</li>
+        {% if donation.pending %}
+            <li>
+                <span class='donation-pending'>{{donation.balance}} by {{donation.user.name}} (대기중)</span>
+                {% if current_user.id == petition.author.id %}
+                <a href="#" onclick="approve_fund({{loop.index0}},{{donation.balance}},'{{donation.user.id}}','{{item.id}}')"><i class='fa fa-check'></i></a>
+                {% endif %}
+            </li>
+        {% else %}
+            <li>
+                <span class='donation-confirmed'>{{donation.balance}} by {{donation.user.name}} ({{donation.timestamp.strftime("%m/%d %H:%M")}})</span>
+            </li>
+        {% endif %}
     {% endfor %}
     </ul>
 </li>
@@ -53,6 +69,26 @@ function fund(uid, obj) {
             alert("Error occured while funding");
         }
     });
+}
+
+function approve_fund(index, balance, user_id, item_id) {
+    var r = confirm("이 펀딩을 받으셨습니까?");
+    if (!r) return;
+    $.ajax({
+        type: 'PUT',
+        url: '/api/item/' + item_id + '/donation/confirm',
+        data: {
+            user_id: user_id,
+            balance: balance,
+            index: index
+        },
+        success: function(data) {
+            location.reload();
+        },
+        error: function() {
+            alert("Error occured while confirming funding");
+        }
+    })
 }
 </script>
 {% endblock %}

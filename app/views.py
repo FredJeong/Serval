@@ -31,6 +31,10 @@ def load_user(id):
 def not_found(e):
     return "HTTP 404 NOT FOUND"
 
+@app.errorhandler(403)
+def not_found(e):
+    return "HTTP 403 FORBIDDEN"
+
 @facebook.tokengetter
 def get_facebook_token():
     return session.get('facebook_token')
@@ -154,11 +158,44 @@ class Donation(Resource):
             balance=args['balance'], message=args['message'])
         user = models.User.objects(facebook_id=session['user_id']).first()
         donation.user = user
-        item.current_fund += args['balance']
+        item.pending_fund += args['balance']
         item.donations.append(donation)
+        item.save()
+
+        return item.__dict__(), 200
+
+class DonationConfirm(Resource):
+    def put(self, uid):
+        parser = reqparse.RequestParser()
+        parser.add_argument('cancel', type=bool, default=False)
+        parser.add_argument('balance', type=int)
+        parser.add_argument('user_id', type=str)
+        parser.add_argument('index', type=int)
+        args = parser.parse_args()
+
+        item = models.Item.objects(id=uid).first()
+        if item is None:
+            print("No item for %s" % uid)
+            abort(404)
+
+        donation = item.donations[args['index']]
+        petition = models.Petition.objects(items=item).first()
+
+        if petition is None:
+            print("No petition found")
+            abort(404)
+
+        if str(petition.author.facebook_id) != session['user_id']:
+            print("User does not match")
+            abort(403)
+
+        if str(donation.user.id) == args['user_id'] and donation.balance == args['balance']:
+            donation.pending = args['cancel']
+            item.update_fund()
         item.save()
 
         return item.__dict__(), 200
 
 api.add_resource(Petition, '/api/petition', '/api/petition/<string:uid>')
 api.add_resource(Donation, '/api/item/<string:uid>/fund')
+api.add_resource(DonationConfirm, '/api/item/<string:uid>/donation/confirm')
