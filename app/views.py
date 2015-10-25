@@ -20,7 +20,7 @@ facebook = oauth.remote_app('facebook',
     authorize_url='https://www.facebook.com/dialog/oauth',
     consumer_key=config.SOCIAL_FACEBOOK['consumer_key'],
     consumer_secret=config.SOCIAL_FACEBOOK['consumer_secret'],
-    request_token_params={'scope': ('email, ')}
+    request_token_params={'scope': ('email, user_friends, ')}
 )
 
 lm.login_view = 'facebook_login'
@@ -98,7 +98,7 @@ def index():
         petitions = models.Petition.objects(author=user)
         friend_petitions = []
         for friend in user.friends:
-            friend_petitions = models.Petition.objects(author=friend)
+            f_petitions = models.Petition.objects(author=friend)
             friend_petitions.append((friend, friend_petitions))
     else:
         return render_template('login.html')
