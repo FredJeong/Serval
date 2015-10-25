@@ -22,7 +22,7 @@
 
 <h3>친구들의 펀딩</h3>
 {% for friend, petitions in friend_petitions %}
-    {% if petitions.length > 0 %}
+    {% if (petitions|length) > 0 %}
     <h4>{{friend.name}}</h4>
     <ul>
     {% for petition in petitions %}

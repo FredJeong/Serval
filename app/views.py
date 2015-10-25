@@ -81,7 +81,7 @@ def facebook_authorized(resp):
     friends = []
     friends_query = facebook.get('/me/friends?limit=500')
     friends = friends_query.data
-
+    print(friends)
     user.update_friends(friends)
 
     return redirect(next_url)
@@ -99,7 +99,7 @@ def index():
         friend_petitions = []
         for friend in user.friends:
             f_petitions = models.Petition.objects(author=friend)
-            friend_petitions.append((friend, friend_petitions))
+            friend_petitions.append((friend, f_petitions))
     else:
         return render_template('login.html')
 
