@@ -1,7 +1,7 @@
 #-*-coding: utf-8 -*-
 from app import config, app, api, db, models, lm, forms
 from flask import render_template, Response, redirect, url_for, request, abort, session
-from flask.ext.restful import Resource, reqparse, fields, marshal_with
+from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs
 
 from mongoengine.queryset import DoesNotExist
 from mongoengine import ValidationError
@@ -186,7 +186,7 @@ class Donation(Resource):
 class DonationConfirm(Resource):
     def put(self, uid):
         parser = reqparse.RequestParser()
-        parser.add_argument('cancel', type=bool, default=False)
+        parser.add_argument('cancel', type=inputs.boolean, default=False)
         parser.add_argument('balance', type=int)
         parser.add_argument('user_id', type=str)
         parser.add_argument('index', type=int)
@@ -209,7 +209,31 @@ class DonationConfirm(Resource):
             abort(403)
 
         if str(donation.user.id) == args['user_id'] and donation.balance == args['balance']:
+            print(args['cancel'])
             donation.pending = args['cancel']
+            item.update_fund()
+        item.save()
+
+        return item.__dict__(), 200
+
+    def delete(self, uid):
+        parser = reqparse.RequestParser()
+        parser.add_argument('balance', type=int)
+        parser.add_argument('user_id', type=str)
+        parser.add_argument('index', type=int)
+        args = parser.parse_args()
+
+        item = models.Item.objects(id=uid).first()
+        if item is None:
+            print("No item for %s" % uid)
+            abort(404)
+
+        donation = item.donations[args['index']]
+
+        if str(donation.user.facebook_id) == session['user_id'] and donation.balance == args['balance']:
+            print(item.donations)
+            item.donations.remove(donation)
+            print(item.donations)
             item.update_fund()
         item.save()
 

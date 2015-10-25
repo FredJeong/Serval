@@ -6,13 +6,12 @@
 <style>
 #item-list ul{margin-bottom: 10px;}
 #item-list .progress {max-width:500px;}
-.donation-pending {color: #888;}
-.donation-confirmed {color: #5CB85C;}
 </style>
 <h3>구매 목록</h3>
 <ul id="item-list">
 {% for item in petition.items %}
 <li>
+    {% if item.current_fund < item.target_fund %}
     <form class="form-inline">
         <div class="form-group">
             <label>{{item.description}} ({{item.current_fund}}/{{item.target_fund}})</label>
@@ -20,6 +19,9 @@
         </div>
         <button class="btn btn-default" type="button" onclick='fund("{{item.id}}",this)'>펀딩</button>
     </form>
+    {% else %}
+    <label><strong>{{item.description}} ({{item.current_fund}}/{{item.target_fund}})</strong> <span class="text-success"><i class='fa fa-check'></i>완료!</span></label>
+    {% endif %}
     <div class="progress">
         <div class="progress-bar progress-bar-success" style="width: {{item.current_fund*100/item.target_fund}}%;">
             {{(item.current_fund*100/item.target_fund) | round }}%
@@ -34,14 +36,23 @@
     {% for donation in item.donations %}
         {% if donation.pending %}
             <li>
-                <span class='donation-pending'>{{donation.balance}} by {{donation.user.name}} (대기중)</span>
+                <span class='text-muted'>{{donation.balance}} by {{donation.user.name}} (대기중)</span>
                 {% if current_user.id == petition.author.id %}
                 <a href="#" onclick="approve_fund({{loop.index0}},{{donation.balance}},'{{donation.user.id}}','{{item.id}}')"><i class='fa fa-check'></i></a>
+                {% endif %}
+                {% if current_user.id == donation.user.id %}
+                <a href="#" onclick="remove_fund({{loop.index0}},{{donation.balance}},'{{donation.user.id}}','{{item.id}}')"><i class='fa fa-times'></i></a>
                 {% endif %}
             </li>
         {% else %}
             <li>
-                <span class='donation-confirmed'>{{donation.balance}} by {{donation.user.name}} ({{donation.timestamp.strftime("%m/%d %H:%M")}})</span>
+                <span class='text-success'>{{donation.balance}} by {{donation.user.name}} ({{donation.timestamp.strftime("%m/%d %H:%M")}})</span>
+                {% if current_user.id == petition.author.id %}
+                <a href="#" onclick="approve_fund({{loop.index0}},{{donation.balance}},'{{donation.user.id}}','{{item.id}}',true)"><i class='fa fa-undo'></i></a>
+                {% endif %}
+                {% if current_user.id == donation.user.id %}
+                <a href="#" onclick="remove_fund({{loop.index0}},{{donation.balance}},'{{donation.user.id}}','{{item.id}}')"><i class='fa fa-times'></i></a>
+                {% endif %}
             </li>
         {% endif %}
     {% endfor %}
@@ -71,11 +82,38 @@ function fund(uid, obj) {
     });
 }
 
-function approve_fund(index, balance, user_id, item_id) {
-    var r = confirm("이 펀딩을 받으셨습니까?");
+function approve_fund(index, balance, user_id, item_id, cancel) {
+    cancel = cancel || false;
+    var r = false;
+    
+    if(!cancel) r = confirm("이 펀딩을 받으셨습니까?");
+    else r = confirm("이 펀딩을 취소하시겠습니까?");
+
+    console.log(cancel);
     if (!r) return;
     $.ajax({
         type: 'PUT',
+        url: '/api/item/' + item_id + '/donation/confirm',
+        data: {
+            user_id: user_id,
+            balance: balance,
+            index: index,
+            cancel: cancel
+        },
+        success: function(data) {
+            location.reload();
+        },
+        error: function() {
+            alert("Error occured while confirming funding");
+        }
+    })
+}
+
+function remove_fund(index, balance, user_id, item_id) {
+    var r = confirm("이 펀딩을 지우시겠습니까?");
+    if (!r) return;
+    $.ajax({
+        type: 'DELETE',
         url: '/api/item/' + item_id + '/donation/confirm',
         data: {
             user_id: user_id,
