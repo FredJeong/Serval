@@ -23,6 +23,8 @@ facebook = oauth.remote_app('facebook',
     request_token_params={'scope': ('email, ')}
 )
 
+lm.login_view = 'facebook_login'
+
 @lm.user_loader
 def load_user(id):
     return models.User.objects(facebook_id=id).first()
@@ -34,6 +36,10 @@ def not_found(e):
 @app.errorhandler(403)
 def not_found(e):
     return "HTTP 403 FORBIDDEN"
+
+@app.errorhandler(401)
+def not_found(e):
+    return redirect('/')
 
 @facebook.tokengetter
 def get_facebook_token():
@@ -72,6 +78,12 @@ def facebook_authorized(resp):
         user.save()
     login_user(user)
 
+    friends = []
+    friends_query = facebook.get('/me/friends?limit=500')
+    friends = friends_query.data
+
+    user.update_friends(friends)
+
     return redirect(next_url)
 
 @app.route('/logout')
@@ -81,14 +93,20 @@ def logout():
 
 @app.route('/')
 def index():
-    petitions = None
     if 'logged_in' in session and session['logged_in']:
         user = models.User.objects(facebook_id=session['user_id']).first()
         petitions = models.Petition.objects(author=user)
+        friend_petitions = []
+        for friend in user.friends:
+            friend_petitions = models.Petition.objects(author=friend)
+            friend_petitions.append((friend, friend_petitions))
+    else:
+        return render_template('login.html')
+
     return render_template(
         'index.html',
         session=session,
-        petitions=petitions)
+        petitions=petitions, friend_petitions=friend_petitions)
 
 @app.route('/petition/create')
 def add_petition():
@@ -99,6 +117,7 @@ def add_petition():
         form=form)
 
 @app.route('/petition/<string:uid>')
+@login_required
 def view_petition(uid):
     try:
         petition = models.Petition.objects(id=uid).first()

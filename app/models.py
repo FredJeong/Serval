@@ -6,6 +6,16 @@ from helper import to_timestamp
 class User(db.Document):
     facebook_id = LongField(unique=True)
     name = StringField()
+    friends = ListField(ReferenceField('User'))
+
+    def update_friends(self, friends):
+        #Check if it works; to prevent excessive query
+        #if len(self.friends) == len(friends):
+        #    return
+        friends = map(lambda x:x['id'], friends['data'])
+        self.friends = self.__class__.objects(facebook_id__in=friends)
+        self.save()
+
 
     def is_authenticated(self):
         return True
