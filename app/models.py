@@ -16,7 +16,6 @@ class User(db.Document):
         self.friends = self.__class__.objects(facebook_id__in=friends)
         self.save()
 
-
     def is_authenticated(self):
         return True
 

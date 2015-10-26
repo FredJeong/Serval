@@ -1,6 +1,6 @@
 <head>
     <title>Project Serval</title>
-    <link rel="stylesheet" href="/static/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/bootstrap.lumen.min.css" />
     <link rel="stylesheet" href="/static/styles.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 
@@ -8,6 +8,14 @@
     {% block styles %}{% endblock %}
 </head>
 <body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+            <a href="/" class="navbar-brand">Serval</a>
+        </div>
+        <p class="navbar-text"><a href="/" class="navbar-link">{{current_user.name}}</a></p>
+      </div>
+    </nav>
     <div class="container">
     {% block content %}{% endblock %}
     </div>

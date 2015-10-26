@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{petition.title}}</h1>
+<h2>{{petition.title}} <small>by <a href='/user/{{petition.author.id}}'>{{petition.author.name}}</a> on {{petition.timestamp.strftime('%Y.%m.%d')}}</small></h2>
 <div>{{petition.content}}</div>
 <style>
 #item-list ul{margin-bottom: 10px;}
 #item-list .progress {max-width:500px;}
 </style>
-<h3>구매 목록</h3>
+<h4>구매 목록</h4>
 <ul id="item-list">
 {% for item in petition.items %}
 <li>
@@ -36,7 +36,7 @@
     {% for donation in item.donations %}
         {% if donation.pending %}
             <li>
-                <span class='text-muted'>{{donation.balance}} by {{donation.user.name}} (대기중)</span>
+                <span class='text-muted'>{{donation.balance}} by <a class='text-muted' href='/user/{{donation.user.id}}'>{{donation.user.name}}</a> (대기중)</span>
                 {% if current_user.id == petition.author.id %}
                 <a href="#" onclick="approve_fund({{loop.index0}},{{donation.balance}},'{{donation.user.id}}','{{item.id}}')"><i class='fa fa-check'></i></a>
                 {% endif %}
@@ -46,7 +46,7 @@
             </li>
         {% else %}
             <li>
-                <span class='text-success'>{{donation.balance}} by {{donation.user.name}} ({{donation.timestamp.strftime("%m/%d %H:%M")}})</span>
+                <span class='text-success'>{{donation.balance}} by <a class='text-success'  href='/user/{{donation.user.id}}'>{{donation.user.name}}</a> ({{donation.timestamp.strftime("%m/%d %H:%M")}})</span>
                 {% if current_user.id == petition.author.id %}
                 <a href="#" onclick="approve_fund({{loop.index0}},{{donation.balance}},'{{donation.user.id}}','{{item.id}}',true)"><i class='fa fa-undo'></i></a>
                 {% endif %}

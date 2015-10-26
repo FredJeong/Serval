@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/bootstrap-social.css">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header" id="login_info">
+    <h1>{{user.name}} 의 펀딩</h1>
+</div>
+
+<ul id="petitions">
+{% for petition in petitions %}
+    <li><a href="/petition/{{petition.id}}">{{petition.title}}</a> <small style="color:#888;">{{petition.timestamp.strftime("%m/%d %H:%M")}}</small></li>
+{% endfor %}
+</ul>
+
+{% endblock %}

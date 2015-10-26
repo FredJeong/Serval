@@ -132,6 +132,26 @@ def view_petition(uid):
         session=session,
         petition=petition)
 
+@app.route('/user/<string:uid>')
+@login_required
+def view_user(uid):
+    if uid == str(current_user.id) or \
+        uid == str(current_user.facebook_id):
+        return redirect('/')
+    try:
+        user = models.User.objects(id=uid).first()
+    except ValidationError:
+        user = models.User.objects(facebook_id=uid).first()
+    if user is None:
+        abort(404)
+
+    petitions = models.Petition.objects(author=user)
+
+    return render_template(
+        'user.html',
+        session=session,
+        user=user,
+        petitions=petitions)
 
 
 class Petition(Resource):
