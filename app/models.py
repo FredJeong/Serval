@@ -1,3 +1,4 @@
+#-*- coding: utf-8-*-
 from app import db
 from mongoengine import *
 import datetime
@@ -7,6 +8,8 @@ class User(db.Document):
     facebook_id = LongField(unique=True)
     name = StringField()
     friends = ListField(ReferenceField('User'))
+    profile = StringField()
+    first_name = StringField()
 
     def update_friends(self, friends):
         #Check if it works; to prevent excessive query
@@ -54,6 +57,7 @@ class Item(db.Document):
     pending_fund = IntField(required=True, default=0)
     donations = ListField(EmbeddedDocumentField(Donation))
     description = StringField(default='')
+    recommended_funding = IntField()
 
     def __dict__(self):
         return {
@@ -78,6 +82,11 @@ class Petition(db.Document):
     content = StringField()
     items = ListField(ReferenceField(Item))
     timestamp = DateTimeField(default=datetime.datetime.now)
+    due = DateTimeField()
+    video_link = StringField()
+    cover_link = StringField()
+
+
 
     def __dict__(self):
         return {

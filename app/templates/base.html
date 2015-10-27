@@ -9,11 +9,26 @@
 </head>
 <body>
     <nav class="navbar navbar-default navbar-fixed-top">
-      <div class="container">
+      <div class="container-fluid">
         <div class="navbar-header">
-            <a href="/" class="navbar-brand">Serval</a>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand hidden-xs">Serval</a>
+            <a href="/" class="navbar-brand visible-xs-inline-block">S</a>
+
         </div>
-        <p class="navbar-text"><a href="/" class="navbar-link">{{current_user.name}}</a></p>
+        <div class="collapse navbar-collapse" id="navbar-collapse-1">
+            <p class="navbar-text"><a href="/" class="navbar-link">{{current_user.name}}</a>
+            </p>
+            <p class="navbar-text"><a href="mailto:wwee3631+serval@gmail.com" class="navbar-link">버그 리포트(개발자 괴롭히기)</a>
+            </p>
+            <p class="navbar-text"><a href="https://www.facebook.com/FredJeong" class="navbar-link">개발자 페이스북</a>
+            </p>
+        </div>
       </div>
     </nav>
     <div class="container">
@@ -21,5 +36,6 @@
     </div>
     <script type="text/javascript" src="/static/jquery.min.js"></script>
     <script type="text/javascript" src="/static/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/polyfill.js"></script>
     {% block scripts %}{% endblock %}
 </body>

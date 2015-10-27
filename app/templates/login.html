@@ -1,10 +1,14 @@
-{% extends "base.html" %}
+<html>
+<head>
+    <title>Project Serval</title>
+    <link rel="stylesheet" href="/static/bootstrap.lumen.min.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 
-{% block styles %}
-<link rel="stylesheet" href="/static/bootstrap-social.css">
-{% endblock %}
-
-{% block content %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/bootstrap-social.css">
+</head>
+<body>
 <style>
 body {
 
@@ -47,12 +51,13 @@ body {
         <img src="/static/serval.png">
     </div>
     <div class="login-body">
-        <h2><strong>Project Serval<strong></h2>
-        <a class="btn btn-block btn-social btn-facebook" href="/facebook_login">
+        <h2><strong>Project Serval</strong></h2>
+        <a style="max-width:200px;" class="btn btn-block btn-social btn-facebook" href="/facebook_login">
             <i class="fa fa-facebook"></i>
             Sign in with Facebook
         </a>
     </div>
 </div>
 
-{% endblock %}
+<script type="text/javascript" src="/static/bootstrap.min.js"></script>
+</body>

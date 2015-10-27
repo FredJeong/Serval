@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>{{petition.title}} <small>by <a href='/user/{{petition.author.id}}'>{{petition.author.name}}</a> on {{petition.timestamp.strftime('%Y.%m.%d')}}</small></h2>
-<div>{{petition.content}}</div>
+<h2>{{petition.title}} <small>by <a href='/user/{{petition.author.id}}'>{{petition.author.name}}</a></small></h2>
+<h6 class='text-muted'>{{petition.timestamp.strftime('%Y.%m.%d')}}</h6>
+<div>{{petition.content|safe}}</div>
 <style>
 #item-list ul{margin-bottom: 10px;}
 #item-list .progress {max-width:500px;}
@@ -12,10 +13,18 @@
 {% for item in petition.items %}
 <li>
     {% if item.current_fund < item.target_fund %}
+    <label>{{item.description}} ({{item.current_fund}}/{{item.target_fund}})</label>
     <form class="form-inline">
         <div class="form-group">
-            <label>{{item.description}} ({{item.current_fund}}/{{item.target_fund}})</label>
-            <input style="width:110px" class="form-control" type="number"></input>
+            <label>메세지</label>
+            <input class="form-control" type="text" size="80"></input>
+        </div>
+        <div class="form-group">
+            <label>금액</label>
+            <div class="input-group">
+                <div class="input-group-addon">&#8361;</div>
+                <input style="width:110px" class="form-control" type="number"></input>
+            </div>
         </div>
         <button class="btn btn-default" type="button" onclick='fund("{{item.id}}",this)'>펀딩</button>
     </form>
@@ -46,7 +55,7 @@
             </li>
         {% else %}
             <li>
-                <span class='text-success'>{{donation.balance}} by <a class='text-success'  href='/user/{{donation.user.id}}'>{{donation.user.name}}</a> ({{donation.timestamp.strftime("%m/%d %H:%M")}})</span>
+                <span class='text-success'>{{donation.message or donation.balance}} by <a class='text-success'  href='/user/{{donation.user.id}}'>{{donation.user.name}}</a> ({{donation.timestamp.strftime("%m/%d %H:%M")}})</span>
                 {% if current_user.id == petition.author.id %}
                 <a href="#" onclick="approve_fund({{loop.index0}},{{donation.balance}},'{{donation.user.id}}','{{item.id}}',true)"><i class='fa fa-undo'></i></a>
                 {% endif %}
@@ -64,13 +73,15 @@
 {% block scripts %}
 <script type="text/javascript">
 function fund(uid, obj) {
-    var balance = $(obj).parent().find("input").val();
+    var message = $(obj).parent().find("input[type=text]").val();
+    var balance = $(obj).parent().find("input[type=number]").val();
 
     $.ajax({
         type: 'PUT',
         url: '/api/item/' + uid + '/fund',
         data: {
-            balance: balance
+            balance: balance,
+            message: message
         },
         success: function(data) {
 

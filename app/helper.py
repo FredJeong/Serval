@@ -1,3 +1,4 @@
+#-*- coding: utf-8-*-
 import datetime
 
 def to_timestamp(t):

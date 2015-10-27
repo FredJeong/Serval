@@ -66,6 +66,7 @@ def facebook_authorized(resp):
     session['facebook_token'] = (resp['access_token'], '')
 
     data = facebook.get('/me').data
+    print(data)
     if 'id' in data and 'name' in data:
         session['user_id'] = data['id']
         session['user_name'] = data['name']
@@ -81,7 +82,6 @@ def facebook_authorized(resp):
     friends = []
     friends_query = facebook.get('/me/friends?limit=500')
     friends = friends_query.data
-    print(friends)
     user.update_friends(friends)
 
     return redirect(next_url)
@@ -94,6 +94,13 @@ def logout():
 @app.route('/')
 def index():
     if 'logged_in' in session and session['logged_in']:
+        if 'user_id' not in session or session['user_id']:
+            data = facebook.get('/me').data
+            if 'id' in data and 'name' in data:
+                session['user_id'] = data['id']
+                session['user_name'] = data['name']
+            else:
+                print("data does not contain id/name")
         user = models.User.objects(facebook_id=session['user_id']).first()
         petitions = models.Petition.objects(author=user)
         friend_petitions = []
@@ -162,6 +169,7 @@ class Petition(Resource):
         parser.add_argument('items[]', dest='items', type=unicode, action='append')
 
         args = parser.parse_args()
+        print(args['items'])
         items = map(lambda x: x.split('|', 1), args['items'])
         items = map(lambda x:
             models.Item(target_fund=int(x[0]), description=x[1]).save(),

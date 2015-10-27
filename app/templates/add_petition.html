@@ -29,6 +29,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="//cdn.ckeditor.com/4.5.4/standard/ckeditor.js"></script>
 <script type="text/javascript">
 function add_item_input() {
     var html = 
@@ -36,7 +37,8 @@ function add_item_input() {
         "<div class='form-group'><label>상품명</label>" +
         "<input class='form-control' type='text' name='item_name'></input></div>" +
         "<div class='form-group'><label>가격</label>" +
-        "<input class='form-control' type='number' name='item_price'></input></div>" +
+        "<div class='input-group'><div class='input-group-addon'>&#8361;</div>" +
+        "<input class='form-control' type='number' name='item_price'></input></div></div>" +
         "<button class='btn btn-danger' type='button' onclick='remove_item(this);'>" + 
         "<i class='fa fa-times'></i>" +
         "</button></li>";
@@ -50,12 +52,33 @@ function remove_item(obj) {
 
 function submit_form() {
     var title = $("#title").val();
-    var content = $("#content").val();
+    var content = CKEDITOR.instances.content.getData();
+    if (!title || title.trim() === "") {
+        alert("제목을 입력해주세요.");
+        return;
+    }
+    if (!content || content.trim() === "") {
+        alert("내용을 입력해주세요.");
+    }
     var items = [];
+    var flag = true
     $("#items li").each(function(i, e) {
-        items.push(
-            $(e).find("input[type=number]").val() + "|" + $(e).find("input[type=text]").val());
+        var price = $(e).find("input[type=number]").val();
+        var description = $(e).find("input[type=text]").val();
+        if (!description || description.trim() === "") return true;
+        if (!price || price.trim() === "") {
+            alert(description + "의 가격을 입력해주세요.");
+            flag = false;
+            return false;
+        }
+        items.push(price + "|" + description);
     });
+
+    if(!flag) return;
+    if(items.length === 0) {
+        alert("최소 한 개의 상품을 입력해주세요.");
+        return;
+    }
 
     $.ajax({
         type: "POST",
@@ -76,5 +99,7 @@ function submit_form() {
 }
 
 add_item_input();
+CKEDITOR.replace("content");
+
 </script>
 {% endblock %}
