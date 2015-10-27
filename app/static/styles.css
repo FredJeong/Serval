@@ -1,3 +1,4 @@
 body {padding-top: 70px;}
 .progress-bar{line-height:15px;}
 .progress{box-shadow:0px -2px 0px rgba(0, 0, 0, 0.1) inset;}
+#content img {max-width:100%;}

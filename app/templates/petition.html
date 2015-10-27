@@ -1,9 +1,11 @@
 {% extends "base.html" %}
-
+{% block styles %}
+<meta property="og:title" content="{{petition.title}}" />
+{% endblock %}
 {% block content %}
 <h2>{{petition.title}} <small>by <a href='/user/{{petition.author.id}}'>{{petition.author.name}}</a></small></h2>
 <h6 class='text-muted'>{{petition.timestamp.strftime('%Y.%m.%d')}}</h6>
-<div>{{petition.content|safe}}</div>
+<div id="content">{{petition.content|safe}}</div>
 <style>
 #item-list ul{margin-bottom: 10px;}
 #item-list .progress {max-width:500px;}
