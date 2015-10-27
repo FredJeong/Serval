@@ -71,6 +71,11 @@ function submit_form() {
             flag = false;
             return false;
         }
+        if (price < 0) {
+            alert(description + "의 가격은 음수일 수 없습니다!");
+            flag = false;
+            return false;
+        }
         items.push(price + "|" + description);
     });
 
