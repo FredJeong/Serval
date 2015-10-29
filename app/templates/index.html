@@ -20,23 +20,13 @@
 <a class="btn btn-success" href="/petition/create">새 펀딩 만들기..</a>
 
 <h3>친구들의 펀딩</h3>
-{% for friend, petitions in friend_petitions %}
-    {% if (petitions|length) > 0 %}
-    <h4>{{friend.name}}</h4>
-    <ul>
-    {% for petition in petitions %}
-        <li><a href="/petition/{{petition.id}}">{{petition.title}}</a> <small style="color:#888;">{{petition.timestamp.strftime("%m/%d %H:%M")}}</small></li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-{% endfor %}
 <div class="row">
     {% for friend, petitions in friend_petitions %}
     {% if (petitions|length) > 0 %}
     {% for petition in petitions %}
-        <div class="col-sm-6 col-md-4">
+        <div class="col-sm-6 col-md-4 col-lg-3">
             <div class="thumbnail">
-                <a href="/petition/{{petition.id}}">
+                <a href="/petition/{{petition.id}}" class="thumbnail">
                     <img src="{{petition.cover_link or '/static/images/cover_default.jpg'}}">
                 </a>
                 <div class="caption">
@@ -46,7 +36,6 @@
                 </div>
           </div>
         </div>
-      </div>
     {% endfor %}
     {% endif %}
 {% endfor %}
