@@ -3,14 +3,46 @@
 <meta property="og:title" content="{{petition.title}}" />
 {% endblock %}
 {% block content %}
-<h2>{{petition.title}} <small>by <a href='/user/{{petition.author.id}}'>{{petition.author.name}}</a></small></h2>
-<h6 class='text-muted'>{{petition.timestamp.strftime('%Y.%m.%d')}}</h6>
-<div id="content">{{petition.content|safe}}</div>
 <style>
 #item-list ul{margin-bottom: 10px;}
 #item-list .progress {max-width:500px;}
+#cover {width: 100%; max-width: 640px;}
+#cover img {width: 100%;}
+#cover2 {height:480px; width: 100%; max-width: 640px; background-image: url('{{petition.cover_link}}')}
+#video {max-width: 640px;}
 </style>
+
+<h2>{{petition.title}} <small>by <a href='/user/{{petition.author.id}}'>{{petition.author.name}}</a></small></h2>
+<h6 class='text-muted'>{{petition.timestamp.strftime('%Y.%m.%d')}}</h6>
+
+{% if petition.cover_link %}
+<div id="cover">
+    <h4>Cover</h4>
+    <img src="{{petition.cover_link}}">
+</div>
+<div id="cover2">
+</div>
+{% endif %}
+{% if petition.video_link %}
+    {% set ratio = petition.video_link.split('|',1)[0] %}
+    {% set link = petition.video_link.split('|',1)[1] %}
+    <div id="video">
+        <h4>Video</h4>
+        <div class="embed-responsive embed-responsive-{{ratio}}">
+            <iframe class="embed-responsive-item" src="{{link}}"></iframe>
+        </div>
+    </div>
+{% endif %}
+<div id="content">{{petition.content|safe}}</div>
+
 <h4>구매 목록</h4>
+{% if not session.user_id %}
+<p>펀딩 정보를 보고 펀딩하시려면 페이스북으로 로그인해주세요!</p>
+<a style="max-width:200px;" class="btn btn-block btn-social btn-facebook" href="/facebook_login?next=/petition/{{petition.id}}">
+    <i class="fa fa-facebook"></i>
+    facebook으로 로그인하기
+</a>
+{% else %}
 <ul id="item-list">
 {% for item in petition.items %}
 <li>
@@ -25,7 +57,7 @@
             <label>금액</label>
             <div class="input-group">
                 <div class="input-group-addon">&#8361;</div>
-                <input style="width:110px" class="form-control" type="number"></input>
+                <input style="width:110px" class="form-control" type="number" value="{{item.recommended_fund}}"></input>
             </div>
         </div>
         <button class="btn btn-default" type="button" onclick='fund("{{item.id}}",this)'>펀딩</button>
@@ -70,6 +102,7 @@
     </ul>
 </li>
 {% endfor %}
+{% endif %}
 {% endblock %}
 
 {% block scripts %}

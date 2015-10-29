@@ -57,7 +57,7 @@ class Item(db.Document):
     pending_fund = IntField(required=True, default=0)
     donations = ListField(EmbeddedDocumentField(Donation))
     description = StringField(default='')
-    recommended_funding = IntField()
+    recommended_fund = IntField(default=0)
 
     def __dict__(self):
         return {
@@ -80,6 +80,7 @@ class Petition(db.Document):
     author = ReferenceField(User)
     title = StringField()
     content = StringField()
+    summary = StringField()
     items = ListField(ReferenceField(Item))
     timestamp = DateTimeField(default=datetime.datetime.now)
     due = DateTimeField()

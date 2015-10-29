@@ -8,6 +8,9 @@
 #items li{min-height: 40px;}
 #items {padding-top: 10px;}
 #items form *{margin-right: 5px;}
+#cover-preview {width: 100%; max-width: 360px;}
+#cover-preview img {width: 100%;}
+#video-preview {max-width: 640px;}
 </style>
 <h2>새 펀딩 만들기</h2>
 <form id="petition_form">
@@ -17,7 +20,31 @@
         {{form.title(class="form-control")}}
     </div>
     <div class="form-group">
+        <label>{{form.summary.label}}</label>
+        {{form.summary(class="form-control")}}
+    </div>
+    <div class="form-group">
+        <label>{{form.cover_link.label}}</label>
+        <label class="text-muted small">상품 또는 기념일과 관련된 커버 사진을 넣어주세요</label>
+        {{form.cover_link(class="form-control")}}
+    </div>
+    <div id="cover-preview"></div>
+    <div class="form-group">
+        <label>{{form.video_link.label}}</label>
+        <label class="text-muted small">상품의 소개 동영상이나 친구들에게 보내는 영상편지를 넣어주세요!</label>
+        {{form.video_link(class="form-control")}}
+        <label for="aspect-ratio"> 동영상 화면비</label>
+        <label class="radio-inline">
+            <input type="radio" name="aspect-ratio" id="aspect-ratio-1" value="16by9" checked="checked"> 16:9
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="aspect-ratio" id="aspect-ratio-1" value="4by3"> 4:3
+        </label>
+    </div>
+    <div id="video-preview"></div>
+    <div class="form-group">
         <label>{{form.content.label}}</label>
+        <label class="text-muted small">상품의 정보와 사진, 펀딩을 받을 방법, 친구들에게 어떻게 보답할지 등을 적어주세요</label>
         {{form.content(class="form-control", rows=5)}}
     </div>
 
@@ -39,6 +66,9 @@ function add_item_input() {
         "<div class='form-group'><label>가격</label>" +
         "<div class='input-group'><div class='input-group-addon'>&#8361;</div>" +
         "<input class='form-control' type='number' name='item_price'></input></div></div>" +
+        "<div class='form-group'><label>추천 펀딩 금액</label>" +
+        "<div class='input-group'><div class='input-group-addon'>&#8361;</div>" +
+        "<input class='form-control' type='number' name='recommended_fund'></input></div></div>" +
         "<button class='btn btn-danger' type='button' onclick='remove_item(this);'>" + 
         "<i class='fa fa-times'></i>" +
         "</button></li>";
@@ -50,11 +80,22 @@ function remove_item(obj) {
     $(obj).parent().parent().remove();
 }
 
+
 function submit_form() {
     var title = $("#title").val();
+    var summary = $("#summary").val();
     var content = CKEDITOR.instances.content.getData();
+    var video_link = $("#video_link").val();
+    if(video_link && video_link !== '') {
+        video_link = $("input[name=aspect-ratio]:checked").val() + "|" + video_link.trim();
+    }
+    var cover_link = $("#cover_link").val();
     if (!title || title.trim() === "") {
         alert("제목을 입력해주세요.");
+        return;
+    }
+    if (!summary || summary.trim() === "") {
+        alert("펀딩의 간단한 설명을 입력해주세요.");
         return;
     }
     if (!content || content.trim() === "") {
@@ -63,7 +104,8 @@ function submit_form() {
     var items = [];
     var flag = true
     $("#items li").each(function(i, e) {
-        var price = $(e).find("input[type=number]").val();
+        var price = $(e).find("input[name=item_price]").val();
+        var recommended_fund = $(e).find("input[name=recommended_fund]").val() || '0';
         var description = $(e).find("input[type=text]").val();
         if (!description || description.trim() === "") return true;
         if (!price || price.trim() === "") {
@@ -76,7 +118,12 @@ function submit_form() {
             flag = false;
             return false;
         }
-        items.push(price + "|" + description);
+        if (recommended_fund < 0) {
+            alert(description + "의 추천 펀딩은 음수일 수 없습니다!");
+            flag = false;
+            return false;
+        }
+        items.push(price + "|" + recommended_fund + "|" + description);
     });
 
     if(!flag) return;
@@ -90,8 +137,11 @@ function submit_form() {
         url: "/api/petition",
         data: {
             title: title,
+            summary: summary,
             content: content,
-            items: items
+            items: items,
+            cover_link: cover_link,
+            video_link: video_link
         },
         success: function(data) {
             console.log(data);
@@ -105,6 +155,34 @@ function submit_form() {
 
 add_item_input();
 CKEDITOR.replace("content");
+
+$("#video_link").change(function() {
+    var ratio = $("input[name=aspect-ratio]:checked").val();
+    var video_link = $("#video_link").val().replace(/</g,'%3C').replace(/>/g,'%3E').replace(/ /g,'%20').replace(/\"/g,'%22');
+    if(!video_link || video_link === '') return;
+    var html = '<div class="embed-responsive embed-responsive-' + ratio + '">' +
+        '<iframe class="embed-responsive-item" src="' + video_link + '"></iframe>' +
+        '</div>';
+    $("#video-preview").html(html);
+});
+
+$("input[name=aspect-ratio]").change(function() {
+    var ratio = $("input[name=aspect-ratio]:checked").val();
+    var video_link = $("#video_link").val().replace(/</g,'%3C').replace(/>/g,'%3E').replace(/ /g,'%20').replace(/\"/g,'%22');
+    if(!video_link || video_link === '') return;
+    var html = '<div class="embed-responsive embed-responsive-' + ratio + '">' +
+        '<iframe class="embed-responsive-item" src="' + video_link + '"></iframe>' +
+        '</div>';
+    $("#video-preview").html(html);
+});
+
+$("#cover_link").change(function() {
+    var cover_link = $("#cover_link").val().replace(/</g,'%3C').replace(/>/g,'%3E').replace(/ /g,'%20').replace(/\"/g,'%22');
+    if(!cover_link || cover_link === '') return;
+    var html = '<img src="' + cover_link + '">';
+    $("#cover-preview").html(html);
+
+});
 
 </script>
 {% endblock %}

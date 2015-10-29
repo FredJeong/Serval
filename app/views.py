@@ -116,6 +116,7 @@ def index():
         petitions=petitions, friend_petitions=friend_petitions)
 
 @app.route('/petition/create')
+@login_required
 def add_petition():
     form = forms.PetitionForm()
     return render_template(
@@ -124,7 +125,6 @@ def add_petition():
         form=form)
 
 @app.route('/petition/<string:uid>')
-@login_required
 def view_petition(uid):
     try:
         petition = models.Petition.objects(id=uid).first()
@@ -162,20 +162,26 @@ def view_user(uid):
 
 
 class Petition(Resource):
+    @login_required
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('title', type=unicode)
         parser.add_argument('content', type=unicode)
+        parser.add_argument('summary', type=unicode)
+        parser.add_argument('cover_link', type=unicode)
+        parser.add_argument('video_link', type=unicode)
         parser.add_argument('items[]', dest='items', type=unicode, action='append')
 
         args = parser.parse_args()
         print(args['items'])
-        items = map(lambda x: x.split('|', 1), args['items'])
+        items = map(lambda x: x.split('|', 2), args['items'])
         items = map(lambda x:
-            models.Item(target_fund=int(x[0]), description=x[1]).save(),
+            models.Item(target_fund=int(x[0]),
+                recommended_fund=int(x[1]), description=x[2]).save(),
             items)
         petition = models.Petition(
-            title=args['title'], content=args['content'],
+            title=args['title'], content=args['content'], summary=args['summary'],
+            cover_link=args['cover_link'], video_link=args['video_link'],
             items=items)
         petition.save()
         user = models.User.objects(facebook_id=session['user_id']).first()
@@ -192,6 +198,7 @@ class Petition(Resource):
         return obj.__dict__(), 200
 
 class Donation(Resource):
+    @login_required
     def put(self, uid):
         parser = reqparse.RequestParser()
         parser.add_argument('balance', type=int)
@@ -212,6 +219,7 @@ class Donation(Resource):
         return item.__dict__(), 200
 
 class DonationConfirm(Resource):
+    @login_required
     def put(self, uid):
         parser = reqparse.RequestParser()
         parser.add_argument('cancel', type=inputs.boolean, default=False)
@@ -237,13 +245,13 @@ class DonationConfirm(Resource):
             abort(403)
 
         if str(donation.user.id) == args['user_id'] and donation.balance == args['balance']:
-            print(args['cancel'])
             donation.pending = args['cancel']
             item.update_fund()
         item.save()
 
         return item.__dict__(), 200
 
+    @login_required
     def delete(self, uid):
         parser = reqparse.RequestParser()
         parser.add_argument('balance', type=int)
@@ -259,9 +267,7 @@ class DonationConfirm(Resource):
         donation = item.donations[args['index']]
 
         if str(donation.user.facebook_id) == session['user_id'] and donation.balance == args['balance']:
-            print(item.donations)
             item.donations.remove(donation)
-            print(item.donations)
             item.update_fund()
         item.save()
 
